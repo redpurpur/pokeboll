@@ -1,0 +1,40 @@
+version: "3.4"
+
+services:
+  poke_web:
+    build:
+      context: ./
+      dockerfile: ./provision/web_dockerfile
+    container_name: poke_web
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 1337:8000
+    restart: unless-stopped
+    volumes:
+      - .:/app/src
+    environment:
+      - DB_NAME=pokemons_dev
+      - DB_USER=poke_dev
+      - DB_PASSWORD=123456
+      - DB_HOST=poke_db
+      - DB_PORT=5432
+    depends_on:
+      - poke_db
+
+  poke_db:
+    image: postgres:10.0-alpine
+    container_name: poke_db
+    ports:
+      - 1818:5432
+    expose:
+      - "5432"
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=poke_dev
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=pokemons_dev
+
+volumes:
+  postgres_data:
